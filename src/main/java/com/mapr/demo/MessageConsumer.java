@@ -42,27 +42,28 @@ public class MessageConsumer {
                 // Request unread messages from the topic.
                 ConsumerRecords<String, String> consumerRecords = consumer.poll(pollTimeOut);
 
-                if (processRecords(consumerRecords)) {
-                    consumer.commitSync();
-                }
-
                 /**
-                 Iterator<ConsumerRecord<String, String>> iterator = consumerRecords.iterator();
-                 if (iterator.hasNext()) {
-                 while (iterator.hasNext()) {
-                 ConsumerRecord<String, String> record = iterator.next();
-
-                 if (processRecords(record)) {
-                 System.out.println((" Consumed Record: " + record.toString()));
-
-                 Map<TopicPartition, OffsetAndMetadata> offsets = new HashMap<>();
-                 offsets.put(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset()));
-                 consumer.commitSync(offsets);
-                 }
-
-                 }
+                 if (processRecords(consumerRecords)) {
+                 consumer.commitSync();
                  }
                  **/
+
+                Iterator<ConsumerRecord<String, String>> iterator = consumerRecords.iterator();
+                if (iterator.hasNext()) {
+                    while (iterator.hasNext()) {
+                        ConsumerRecord<String, String> record = iterator.next();
+
+                        if (processRecords(record)) {
+                            System.out.println((" Consumed Record: " + record.toString()));
+
+                            Map<TopicPartition, OffsetAndMetadata> offsets = new HashMap<>();
+                            offsets.put(new TopicPartition(record.topic(), record.partition()), new OffsetAndMetadata(record.offset()));
+                            consumer.commitSync(offsets);
+                        }
+
+                    }
+                }
+
             } while (true);
         } finally {
             consumer.close();
@@ -98,7 +99,7 @@ public class MessageConsumer {
         props.put("auto.offset.reset", "earliest");
         props.put("group.id", args[1]);
         props.put("client.id", args[2]);
-        props.put("enable.auto.commit", "true");
+        props.put("enable.auto.commit", "false");
         consumer = new KafkaConsumer<String, String>(props);
     }
 
